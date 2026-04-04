@@ -1,0 +1,11 @@
+meta {
+  name: Get List Entry
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/list-entries/{{listEntryId}}
+  body: none
+  auth: none
+}

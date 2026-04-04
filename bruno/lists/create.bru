@@ -1,0 +1,19 @@
+meta {
+  name: Create List
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/lists
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user_id": 1,
+    "name": "My Wishlist",
+    "is_public": false
+  }
+}

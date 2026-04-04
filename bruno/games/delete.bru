@@ -1,0 +1,11 @@
+meta {
+  name: Delete Game
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/games/{{gameId}}
+  body: none
+  auth: none
+}

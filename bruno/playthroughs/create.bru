@@ -1,0 +1,22 @@
+meta {
+  name: Create Playthrough
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/playthroughs
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "game_in_collection_id": 1,
+    "status": "NOT_STARTED",
+    "started_at": null,
+    "completed_at": null,
+    "completion_time": null,
+    "notes": null
+  }
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Create Genre
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/genres
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "New Genre"
+  }
+}

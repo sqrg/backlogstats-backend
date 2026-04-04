@@ -1,0 +1,18 @@
+meta {
+  name: Create Game
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/games
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "New Game",
+    "igdb_id": null
+  }
+}

@@ -1,0 +1,11 @@
+meta {
+  name: Get Platform
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/platforms/{{platformId}}
+  body: none
+  auth: none
+}

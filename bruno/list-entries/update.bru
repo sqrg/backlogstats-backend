@@ -1,0 +1,17 @@
+meta {
+  name: Update List Entry
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/list-entries/{{listEntryId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "position": 2
+  }
+}

@@ -1,0 +1,11 @@
+meta {
+  name: Delete Playthrough
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/playthroughs/{{playthroughId}}
+  body: none
+  auth: none
+}

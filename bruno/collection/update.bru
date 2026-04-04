@@ -1,0 +1,17 @@
+meta {
+  name: Update Collection Entry
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/collection/{{collectionId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "platform_id": 2
+  }
+}

@@ -1,0 +1,11 @@
+meta {
+  name: Delete Genre
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/genres/{{genreId}}
+  body: none
+  auth: none
+}

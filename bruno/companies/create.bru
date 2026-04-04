@@ -1,0 +1,17 @@
+meta {
+  name: Create Company
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/companies
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "New Company"
+  }
+}

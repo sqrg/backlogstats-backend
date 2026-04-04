@@ -1,0 +1,17 @@
+meta {
+  name: Update Company
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/companies/{{companyId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Updated Company"
+  }
+}

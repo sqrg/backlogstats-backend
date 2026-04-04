@@ -1,0 +1,11 @@
+meta {
+  name: Delete List Entry
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/list-entries/{{listEntryId}}
+  body: none
+  auth: none
+}

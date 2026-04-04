@@ -1,0 +1,11 @@
+meta {
+  name: Delete Collection Entry
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/collection/{{collectionId}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Update Playthrough
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/playthroughs/{{playthroughId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "status": "COMPLETED",
+    "started_at": "2024-01-01",
+    "completed_at": "2024-03-15",
+    "completion_time": 60,
+    "notes": "Great game!"
+  }
+}

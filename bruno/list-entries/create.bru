@@ -1,0 +1,19 @@
+meta {
+  name: Create List Entry
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/list-entries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "list_id": 1,
+    "game_id": 1,
+    "position": 1
+  }
+}

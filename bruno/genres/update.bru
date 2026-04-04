@@ -1,0 +1,17 @@
+meta {
+  name: Update Genre
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/genres/{{genreId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Updated Genre"
+  }
+}

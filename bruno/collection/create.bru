@@ -1,0 +1,19 @@
+meta {
+  name: Create Collection Entry
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/collection
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user_id": 1,
+    "game_id": 1,
+    "platform_id": 1
+  }
+}
