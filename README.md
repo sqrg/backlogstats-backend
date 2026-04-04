@@ -15,6 +15,8 @@ FastAPI backend for Backlogstats.
 docker compose up -d
 ```
 
+> **macOS note**: Docker requires [Docker Desktop](https://www.docker.com/products/docker-desktop). Install it, then launch the app and wait for the menu bar icon to become active before running the command above.
+
 > **Linux / Fedora note**: if `docker compose` is not available, install the standalone compose and use the hyphenated form instead:
 > ```bash
 > sudo dnf install docker-compose   # Fedora
@@ -33,15 +35,20 @@ docker compose up -d
 ### 2. Create and activate a virtual environment
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 ```
+
+> **macOS note**: macOS ships with Python 3.9, which does not meet the `>=3.11` requirement. Install a newer version first: `brew install python@3.11`
 
 ### 3. Install dependencies
 
 ```bash
+pip install --upgrade pip
 pip install -e ".[dev]"
 ```
+
+> Upgrading pip is required on older installations — pip 21.3+ is needed for editable installs with the `hatchling` build backend.
 
 ### 4. Configure environment variables
 
@@ -50,6 +57,8 @@ cp .env.example .env
 ```
 
 The `.env` file is pre-filled for local development and works with the Docker Compose database out of the box. Edit it if your setup differs.
+
+> Make sure `.env` is created inside the `backlogstats-backend/` directory (where `alembic.ini` lives), not the repo root.
 
 ### 5. Run migrations
 
