@@ -1,0 +1,16 @@
+meta {
+  name: Search Games (IGDB)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/games/search?q=metal gear&limit=10
+  body: none
+  auth: none
+}
+
+params:query {
+  q: metal gear
+  limit: 10
+}

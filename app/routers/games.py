@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -5,6 +6,8 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.game import Game
 from app.schemas.game import GameCreate, GameRead, GameUpdate
+from app.schemas.igdb import GameFromIGDB, IGDBGameResult
+from app.services.igdb import igdb_service
 
 router = APIRouter(prefix="/games", tags=["games"])
 
@@ -14,6 +17,69 @@ def list_games(
     limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
 ) -> list[Game]:
     return db.execute(select(Game).offset(offset).limit(limit)).scalars().all()
+
+
+# NOTE: /search must be registered before /{id} so FastAPI does not treat the
+# literal string "search" as the value of the {id} path parameter.
+@router.get("/search", response_model=list[IGDBGameResult])
+async def search_games(q: str, limit: int = 10) -> list[IGDBGameResult]:
+    if not igdb_service._credentials_configured():
+        raise HTTPException(
+            status_code=503, detail="IGDB credentials are not configured"
+        )
+    limit = min(limit, 20)
+    try:
+        results = await igdb_service.search_games(q, limit)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 429:
+            raise HTTPException(
+                status_code=429, detail="IGDB rate limit exceeded; please retry shortly"
+            )
+        raise HTTPException(status_code=502, detail="IGDB request failed")
+    return [IGDBGameResult.from_igdb(r) for r in results]
+
+
+@router.post("/from-igdb", response_model=GameRead, status_code=201)
+async def import_game_from_igdb(
+    body: GameFromIGDB, db: Session = Depends(get_db)
+) -> Game:
+    if not igdb_service._credentials_configured():
+        raise HTTPException(
+            status_code=503, detail="IGDB credentials are not configured"
+        )
+
+    # Idempotent: return existing game if already imported.
+    existing = db.execute(
+        select(Game).where(Game.igdb_id == body.igdb_id)
+    ).scalar_one_or_none()
+    if existing:
+        return existing
+
+    try:
+        data = await igdb_service.fetch_game(body.igdb_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 429:
+            raise HTTPException(
+                status_code=429, detail="IGDB rate limit exceeded; please retry shortly"
+            )
+        raise HTTPException(status_code=502, detail="IGDB request failed")
+
+    if data is None:
+        raise HTTPException(status_code=404, detail="Game not found on IGDB")
+
+    cover_data = data.get("cover")
+    game = Game(
+        igdb_id=data["id"],
+        name=data["name"],
+        summary=data.get("summary"),
+        cover_image_id=cover_data["image_id"] if cover_data else None,
+        first_release_date=data.get("first_release_date"),
+        rating=data.get("total_rating"),
+    )
+    db.add(game)
+    db.commit()
+    db.refresh(game)
+    return game
 
 
 @router.get("/{id}", response_model=GameRead)

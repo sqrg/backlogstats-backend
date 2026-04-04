@@ -10,5 +10,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     APP_ENV: Literal["local", "staging", "production"] = "local"
 
+    IGDB_CLIENT_ID: str = ""
+    IGDB_CLIENT_SECRET: str = ""
+
 
 settings = Settings()

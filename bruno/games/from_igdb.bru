@@ -1,0 +1,17 @@
+meta {
+  name: Import Game from IGDB
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/games/from-igdb
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "igdb_id": 1942
+  }
+}

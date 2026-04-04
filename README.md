@@ -90,6 +90,25 @@ Install pre-commit hooks to run these automatically on every commit:
 pre-commit install
 ```
 
+## IGDB setup
+
+Game search and import require a Twitch developer account and a registered application.
+
+1. Go to [dev.twitch.tv](https://dev.twitch.tv) and log in with a Twitch account.
+2. Click **Your Console** → **Applications** → **Register Your Application**.
+3. Set any name, OAuth redirect URL (`http://localhost` is fine for local use), and category.
+4. Copy the **Client ID** and generate a **Client Secret**.
+5. Add them to your `.env`:
+
+```
+IGDB_CLIENT_ID=your_client_id_here
+IGDB_CLIENT_SECRET=your_client_secret_here
+```
+
+Without these values the server starts normally, but `GET /api/v1/games/search` and `POST /api/v1/games/from-igdb` return **503 Service Unavailable**.
+
+Tokens expire after ~60 days and are refreshed automatically on the next request after expiry.
+
 ## Troubleshooting
 
 **`ImportError: email-validator is not installed`** when starting the server — the `pydantic[email]` extra is missing from the virtual environment. Re-run the install step:

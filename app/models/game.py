@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Index, Integer, String, text
+from sqlalchemy import Float, Index, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -30,6 +30,10 @@ class Game(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     igdb_id: Mapped[int | None] = mapped_column(Integer, unique=True)
+    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cover_image_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    first_release_date: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     game_genres: Mapped[list[GameGenre]] = relationship(
         "GameGenre",
