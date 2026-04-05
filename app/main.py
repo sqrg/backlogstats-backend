@@ -5,6 +5,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
 from app.routers import (
+    auth,
     companies,
     game_in_collection,
     games,
@@ -24,6 +25,7 @@ app = FastAPI(
 
 _API_PREFIX = "/api/v1"
 
+app.include_router(auth.router, prefix=_API_PREFIX)
 app.include_router(users.router, prefix=_API_PREFIX)
 app.include_router(games.router, prefix=_API_PREFIX)
 app.include_router(genres.router, prefix=_API_PREFIX)

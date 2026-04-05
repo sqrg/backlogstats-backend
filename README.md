@@ -56,7 +56,7 @@ pip install -e ".[dev]"
 cp .env.example .env
 ```
 
-The `.env` file is pre-filled for local development and works with the Docker Compose database out of the box. Edit it if your setup differs.
+Edit the `.env` file and fill in the values described in the sections below. The database URL works with the Docker Compose setup out of the box; JWT and OAuth keys require generation or registration steps.
 
 > Make sure `.env` is created inside the `backlogstats-backend/` directory (where `alembic.ini` lives), not the repo root.
 
@@ -98,6 +98,78 @@ Install pre-commit hooks to run these automatically on every commit:
 ```bash
 pre-commit install
 ```
+
+## Authentication setup
+
+### JWT secret key
+
+Generate a random 32-byte secret and add it to your `.env`:
+
+```bash
+openssl rand -hex 32
+```
+
+```
+JWT_SECRET_KEY=<output from above>
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_DAYS=30
+```
+
+`JWT_ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES`, and `REFRESH_TOKEN_EXPIRE_DAYS` have sensible defaults in `.env.example` and rarely need changing locally.
+
+The server starts without a `JWT_SECRET_KEY`, but all auth endpoints will return tokens signed with an empty string — **always set this in staging and production**.
+
+### Auth endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/auth/register` | Register with email + password, returns token pair |
+| `POST` | `/api/v1/auth/login` | Login with email + password, returns token pair |
+| `POST` | `/api/v1/auth/refresh` | Exchange a refresh token for a new token pair |
+| `POST` | `/api/v1/auth/google` | Exchange a Google authorization code for a token pair |
+| `POST` | `/api/v1/auth/discord` | Exchange a Discord authorization code for a token pair |
+
+Protected endpoints expect an `Authorization: Bearer <access_token>` header.
+
+### Google OAuth2 setup
+
+Required only if you want to test Google Sign-In locally. The server starts without these values; `POST /api/v1/auth/google` returns **400 Bad Request** if they are not set.
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create (or select) a project.
+2. Navigate to **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth client ID**.
+3. Set application type to **Web application**.
+4. Add your frontend's origin to **Authorized JavaScript origins** and its callback URL to **Authorized redirect URIs**.
+5. Copy the **Client ID** and **Client Secret**.
+6. Add them to your `.env`:
+
+```
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+```
+
+The backend receives a `{ code, redirect_uri }` from the frontend, exchanges it with Google's token endpoint, verifies the returned ID token against Google's public JWKS, and returns a Backlogstats token pair.
+
+### Discord OAuth2 setup
+
+Required only if you want to test Discord Sign-In locally. The server starts without these values; `POST /api/v1/auth/discord` returns **400 Bad Request** if they are not set.
+
+1. Go to [discord.com/developers/applications](https://discord.com/developers/applications) and click **New Application**.
+2. Open the **OAuth2** tab.
+3. Add your frontend's callback URL to **Redirects**.
+4. Copy the **Client ID** and **Client Secret** from the top of the OAuth2 tab.
+5. Add them to your `.env`:
+
+```
+DISCORD_CLIENT_ID=your_client_id_here
+DISCORD_CLIENT_SECRET=your_client_secret_here
+```
+
+The frontend must request the `identify` and `email` scopes when initiating the OAuth2 flow — Discord only returns an email address when the `email` scope is present. The backend exchanges the code, fetches the user from `GET /users/@me`, and returns a Backlogstats token pair.
+
+> **Apple Sign In** — required before App Store submission if any other social login is present. Implementation is deferred (needs Apple Developer account + different JWKS verification flow). The `apple_id` column already exists on the `User` model.
+>
+> **Steam OpenID** — uses OpenID 2.0, not OAuth2. Deferred to a separate task. The `steam_id` column already exists on the `User` model.
 
 ## IGDB setup
 

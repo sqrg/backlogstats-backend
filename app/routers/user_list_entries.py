@@ -3,6 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 from app.models.user_list_entry import UserListEntry
 from app.schemas.user_list_entry import (
     UserListEntryCreate,
@@ -30,7 +32,9 @@ def get_entry(id: int, db: Session = Depends(get_db)) -> UserListEntry:
 
 @router.post("/", response_model=UserListEntryRead, status_code=201)
 def create_entry(
-    body: UserListEntryCreate, db: Session = Depends(get_db)
+    body: UserListEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> UserListEntry:
     entry = UserListEntry(**body.model_dump())
     db.add(entry)
@@ -41,7 +45,10 @@ def create_entry(
 
 @router.put("/{id}", response_model=UserListEntryRead)
 def update_entry(
-    id: int, body: UserListEntryUpdate, db: Session = Depends(get_db)
+    id: int,
+    body: UserListEntryUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> UserListEntry:
     entry = db.get(UserListEntry, id)
     if not entry:
@@ -54,7 +61,11 @@ def update_entry(
 
 
 @router.delete("/{id}", status_code=204)
-def delete_entry(id: int, db: Session = Depends(get_db)) -> None:
+def delete_entry(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
     entry = db.get(UserListEntry, id)
     if not entry:
         raise HTTPException(status_code=404, detail="List entry not found")

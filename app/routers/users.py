@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
 from app.models.game_in_collection import GameInCollection
 from app.models.user import User
 from app.models.user_list import UserList
@@ -60,8 +61,14 @@ def delete_user(id: int, db: Session = Depends(get_db)) -> None:
 
 @router.get("/{id}/collection", response_model=list[GameInCollectionRead])
 def get_user_collection(
-    id: int, limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+    id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> list[GameInCollection]:
+    if current_user.id != id:
+        raise HTTPException(status_code=403, detail="Access forbidden")
     if not db.get(User, id):
         raise HTTPException(status_code=404, detail="User not found")
     return (
@@ -78,8 +85,14 @@ def get_user_collection(
 
 @router.get("/{id}/lists", response_model=list[UserListRead])
 def get_user_lists(
-    id: int, limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+    id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> list[UserList]:
+    if current_user.id != id:
+        raise HTTPException(status_code=403, detail="Access forbidden")
     if not db.get(User, id):
         raise HTTPException(status_code=404, detail="User not found")
     return (

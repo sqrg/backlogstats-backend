@@ -3,6 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 from app.models.user_list import UserList
 from app.models.user_list_entry import UserListEntry
 from app.schemas.user_list import UserListCreate, UserListRead, UserListUpdate
@@ -27,7 +29,11 @@ def get_user_list(id: int, db: Session = Depends(get_db)) -> UserList:
 
 
 @router.post("/", response_model=UserListRead, status_code=201)
-def create_user_list(body: UserListCreate, db: Session = Depends(get_db)) -> UserList:
+def create_user_list(
+    body: UserListCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserList:
     user_list = UserList(**body.model_dump())
     db.add(user_list)
     db.commit()
@@ -37,7 +43,10 @@ def create_user_list(body: UserListCreate, db: Session = Depends(get_db)) -> Use
 
 @router.put("/{id}", response_model=UserListRead)
 def update_user_list(
-    id: int, body: UserListUpdate, db: Session = Depends(get_db)
+    id: int,
+    body: UserListUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> UserList:
     user_list = db.get(UserList, id)
     if not user_list:
@@ -50,7 +59,11 @@ def update_user_list(
 
 
 @router.delete("/{id}", status_code=204)
-def delete_user_list(id: int, db: Session = Depends(get_db)) -> None:
+def delete_user_list(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
     user_list = db.get(UserList, id)
     if not user_list:
         raise HTTPException(status_code=404, detail="List not found")

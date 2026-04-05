@@ -3,7 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
 from app.models.game_in_collection import GameInCollection
+from app.models.user import User
 from app.schemas.game_in_collection import (
     GameInCollectionCreate,
     GameInCollectionRead,
@@ -32,7 +34,9 @@ def get_collection_entry(id: int, db: Session = Depends(get_db)) -> GameInCollec
 
 @router.post("/", response_model=GameInCollectionRead, status_code=201)
 def create_collection_entry(
-    body: GameInCollectionCreate, db: Session = Depends(get_db)
+    body: GameInCollectionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> GameInCollection:
     entry = GameInCollection(**body.model_dump())
     db.add(entry)
@@ -43,7 +47,10 @@ def create_collection_entry(
 
 @router.put("/{id}", response_model=GameInCollectionRead)
 def update_collection_entry(
-    id: int, body: GameInCollectionUpdate, db: Session = Depends(get_db)
+    id: int,
+    body: GameInCollectionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> GameInCollection:
     entry = db.get(GameInCollection, id)
     if not entry:
@@ -56,7 +63,11 @@ def update_collection_entry(
 
 
 @router.delete("/{id}", status_code=204)
-def delete_collection_entry(id: int, db: Session = Depends(get_db)) -> None:
+def delete_collection_entry(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
     entry = db.get(GameInCollection, id)
     if not entry:
         raise HTTPException(status_code=404, detail="Collection entry not found")

@@ -3,7 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies.auth import get_current_user
 from app.models.playthrough import Playthrough
+from app.models.user import User
 from app.schemas.playthrough import (
     PlaythroughCreate,
     PlaythroughRead,
@@ -30,7 +32,9 @@ def get_playthrough(id: int, db: Session = Depends(get_db)) -> Playthrough:
 
 @router.post("/", response_model=PlaythroughRead, status_code=201)
 def create_playthrough(
-    body: PlaythroughCreate, db: Session = Depends(get_db)
+    body: PlaythroughCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> Playthrough:
     playthrough = Playthrough(**body.model_dump())
     db.add(playthrough)
@@ -41,7 +45,10 @@ def create_playthrough(
 
 @router.put("/{id}", response_model=PlaythroughRead)
 def update_playthrough(
-    id: int, body: PlaythroughUpdate, db: Session = Depends(get_db)
+    id: int,
+    body: PlaythroughUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> Playthrough:
     playthrough = db.get(Playthrough, id)
     if not playthrough:
@@ -54,7 +61,11 @@ def update_playthrough(
 
 
 @router.delete("/{id}", status_code=204)
-def delete_playthrough(id: int, db: Session = Depends(get_db)) -> None:
+def delete_playthrough(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> None:
     playthrough = db.get(Playthrough, id)
     if not playthrough:
         raise HTTPException(status_code=404, detail="Playthrough not found")
