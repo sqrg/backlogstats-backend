@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     APP_ENV: Literal["local", "staging", "production"] = "local"
 
+    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+
     IGDB_CLIENT_ID: str = ""
     IGDB_CLIENT_SECRET: str = ""
 

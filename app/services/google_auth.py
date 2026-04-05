@@ -1,14 +1,29 @@
+import asyncio
+import urllib.request as _urllib_request
 from dataclasses import dataclass
 
 import httpx
 from fastapi import HTTPException, status
-from jose import JWTError, jwt
+from google.oauth2 import id_token as google_id_token
 
 from app.core.config import settings
 
 _TOKEN_URL = "https://oauth2.googleapis.com/token"
-_CERTS_URL = "https://www.googleapis.com/oauth2/v3/certs"
-_VALID_ISSUERS = {"accounts.google.com", "https://accounts.google.com"}
+
+
+class _UrllibRequest:
+    """Minimal google-auth transport adapter using stdlib urllib (no `requests` needed)."""
+
+    def __call__(self, url, method="GET", body=None, headers=None, **kwargs):
+        req = _urllib_request.Request(url, method=method)
+        with _urllib_request.urlopen(req) as resp:
+            self.status = resp.status
+            self.data = resp.read()
+            self.headers = dict(resp.headers)
+        return self
+
+
+_google_request = _UrllibRequest()
 
 
 @dataclass
@@ -43,45 +58,21 @@ async def exchange_code(code: str, redirect_uri: str) -> GoogleIdentity:
     return await _verify_id_token(id_token)
 
 
-async def _verify_id_token(id_token: str) -> GoogleIdentity:
-    async with httpx.AsyncClient() as client:
-        certs_response = await client.get(_CERTS_URL)
-        certs_response.raise_for_status()
-    jwks = certs_response.json()
-
+async def _verify_id_token(id_token_str: str) -> GoogleIdentity:
+    loop = asyncio.get_event_loop()
     try:
-        header = jwt.get_unverified_header(id_token)
-    except JWTError:
+        payload = await loop.run_in_executor(
+            None,
+            lambda: google_id_token.verify_oauth2_token(
+                id_token_str,
+                _google_request,
+                settings.GOOGLE_CLIENT_ID,
+            ),
+        )
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Google ID token",
-        )
-
-    kid = header.get("kid")
-    key = next((k for k in jwks.get("keys", []) if k.get("kid") == kid), None)
-    if not key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Google signing key not found",
-        )
-
-    try:
-        payload = jwt.decode(
-            id_token,
-            key,
-            algorithms=["RS256"],
-            audience=settings.GOOGLE_CLIENT_ID,
-        )
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Google ID token",
-        )
-
-    if payload.get("iss") not in _VALID_ISSUERS:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Google ID token issuer",
         )
 
     google_id = payload.get("sub")
