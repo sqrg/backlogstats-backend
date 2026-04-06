@@ -37,6 +37,12 @@ class IGDBInvolvedCompany(BaseModel):
     publisher: bool
 
 
+class IGDBSeriesResult(BaseModel):
+    igdb_id: int
+    name: str
+    slug: str | None
+
+
 class IGDBPlatform(BaseModel):
     igdb_id: int
     name: str
@@ -68,6 +74,7 @@ class IGDBGameResult(BaseModel):
     artwork_image_ids: list[str]
     category: int | None
     status: int | None
+    series: list[IGDBSeriesResult]
 
     @classmethod
     def from_igdb(
@@ -130,6 +137,14 @@ class IGDBGameResult(BaseModel):
             artwork_image_ids=[a["image_id"] for a in data.get("artworks", [])],
             category=data.get("category"),
             status=data.get("status"),
+            series=[
+                IGDBSeriesResult(
+                    igdb_id=c["id"],
+                    name=c["name"],
+                    slug=c.get("slug"),
+                )
+                for c in data.get("collections", [])
+            ],
         )
 
 

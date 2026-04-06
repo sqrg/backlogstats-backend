@@ -20,7 +20,8 @@ _IGDB_FIELDS = (
     " rating, rating_count,"
     " aggregated_rating, aggregated_rating_count,"
     " total_rating, total_rating_count,"
-    " screenshots.image_id, artworks.image_id;"
+    " screenshots.image_id, artworks.image_id,"
+    " collections.id, collections.name, collections.slug;"
 )
 
 

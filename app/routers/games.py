@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.game import Game
+from app.models.game_series import GameSeries
 from app.models.platform import Platform
+from app.models.series import Series
 from app.schemas.game import GameCreate, GameRead, GameUpdate
 from app.schemas.igdb import GameFromIGDB, IGDBGameResult
 from app.services.igdb import igdb_service
@@ -104,6 +106,27 @@ async def import_game_from_igdb(
     db.add(game)
     db.commit()
     db.refresh(game)
+
+    collections = data.get("collections", [])
+    if collections:
+        for c in collections:
+            s = db.execute(
+                select(Series).where(Series.igdb_id == c["id"])
+            ).scalar_one_or_none()
+            if not s:
+                s = Series(igdb_id=c["id"], name=c["name"], slug=c.get("slug"))
+                db.add(s)
+                db.flush()
+            existing_link = db.execute(
+                select(GameSeries).where(
+                    GameSeries.game_id == game.id,
+                    GameSeries.series_id == s.id,
+                )
+            ).scalar_one_or_none()
+            if not existing_link:
+                db.add(GameSeries(game_id=game.id, series_id=s.id))
+        db.commit()
+
     return game
 
 

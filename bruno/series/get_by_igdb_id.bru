@@ -1,0 +1,11 @@
+meta {
+  name: Get Series by IGDB ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/series/igdb/{{seriesIgdbId}}
+  body: none
+  auth: none
+}

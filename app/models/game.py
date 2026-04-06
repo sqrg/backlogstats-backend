@@ -10,6 +10,7 @@ from app.models.base import Base, TimestampMixin
 if TYPE_CHECKING:
     from app.models.game_genre import GameGenre
     from app.models.game_in_collection import GameInCollection
+    from app.models.game_series import GameSeries
     from app.models.user_list_entry import UserListEntry
 
 
@@ -45,6 +46,12 @@ class Game(Base, TimestampMixin):
         "GameInCollection",
         back_populates="game",
         lazy="selectin",
+    )
+    game_series: Mapped[list[GameSeries]] = relationship(
+        "GameSeries",
+        back_populates="game",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )
     list_entries: Mapped[list[UserListEntry]] = relationship(
         "UserListEntry",
