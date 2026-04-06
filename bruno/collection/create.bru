@@ -1,5 +1,5 @@
 meta {
-  name: Create Collection Entry
+  name: Add to Collection
   type: http
   seq: 3
 }
@@ -16,8 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "user_id": 1,
-    "game_id": 1,
-    "platform_id": 1
+    "game_id": {{gameId}},
+    "platform_id": {{platformId}}
   }
 }

@@ -1,0 +1,17 @@
+meta {
+  name: Get Access Token (Twitch OAuth)
+  type: http
+  seq: 0
+}
+
+post {
+  url: https://id.twitch.tv/oauth2/token?client_id={{igdbClientId}}&client_secret={{igdbClientSecret}}&grant_type=client_credentials
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setEnvVar("igdbAccessToken", res.body.access_token);
+  }
+}

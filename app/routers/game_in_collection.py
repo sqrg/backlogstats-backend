@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -9,7 +10,6 @@ from app.models.user import User
 from app.schemas.game_in_collection import (
     GameInCollectionCreate,
     GameInCollectionRead,
-    GameInCollectionUpdate,
 )
 
 router = APIRouter(prefix="/collection", tags=["collection"])
@@ -17,17 +17,31 @@ router = APIRouter(prefix="/collection", tags=["collection"])
 
 @router.get("/", response_model=list[GameInCollectionRead])
 def list_collection(
-    limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> list[GameInCollection]:
     return (
-        db.execute(select(GameInCollection).offset(offset).limit(limit)).scalars().all()
+        db.execute(
+            select(GameInCollection)
+            .where(GameInCollection.user_id == current_user.id)
+            .offset(offset)
+            .limit(limit)
+        )
+        .scalars()
+        .all()
     )
 
 
 @router.get("/{id}", response_model=GameInCollectionRead)
-def get_collection_entry(id: int, db: Session = Depends(get_db)) -> GameInCollection:
+def get_collection_entry(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> GameInCollection:
     entry = db.get(GameInCollection, id)
-    if not entry:
+    if not entry or entry.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Collection entry not found")
     return entry
 
@@ -38,26 +52,20 @@ def create_collection_entry(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> GameInCollection:
-    entry = GameInCollection(**body.model_dump())
+    entry = GameInCollection(
+        user_id=current_user.id,
+        game_id=body.game_id,
+        platform_id=body.platform_id,
+    )
     db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry
-
-
-@router.put("/{id}", response_model=GameInCollectionRead)
-def update_collection_entry(
-    id: int,
-    body: GameInCollectionUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> GameInCollection:
-    entry = db.get(GameInCollection, id)
-    if not entry:
-        raise HTTPException(status_code=404, detail="Collection entry not found")
-    for key, value in body.model_dump(exclude_unset=True).items():
-        setattr(entry, key, value)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Game already in collection on this platform",
+        )
     db.refresh(entry)
     return entry
 
@@ -69,7 +77,7 @@ def delete_collection_entry(
     current_user: User = Depends(get_current_user),
 ) -> None:
     entry = db.get(GameInCollection, id)
-    if not entry:
+    if not entry or entry.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Collection entry not found")
     db.delete(entry)
     db.commit()

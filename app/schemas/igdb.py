@@ -37,6 +37,12 @@ class IGDBInvolvedCompany(BaseModel):
     publisher: bool
 
 
+class IGDBPlatform(BaseModel):
+    igdb_id: int
+    name: str
+    db_id: int
+
+
 class IGDBGameResult(BaseModel):
     igdb_id: int
     name: str
@@ -47,7 +53,7 @@ class IGDBGameResult(BaseModel):
     cover: IGDBCover | None
     genres: list[str]
     themes: list[str]
-    platforms: list[str]
+    platforms: list[IGDBPlatform]
     release_dates: list[IGDBReleaseDate]
     first_release_date: int | None
     involved_companies: list[IGDBInvolvedCompany]
@@ -64,9 +70,12 @@ class IGDBGameResult(BaseModel):
     status: int | None
 
     @classmethod
-    def from_igdb(cls, data: dict) -> "IGDBGameResult":
+    def from_igdb(
+        cls, data: dict, platform_db_ids: dict[int, int] | None = None
+    ) -> "IGDBGameResult":
         cover_data = data.get("cover")
         cover = IGDBCover.from_image_id(cover_data["image_id"]) if cover_data else None
+        platform_db_ids = platform_db_ids or {}
 
         release_dates = [
             IGDBReleaseDate(
@@ -99,7 +108,14 @@ class IGDBGameResult(BaseModel):
             cover=cover,
             genres=[g["name"] for g in data.get("genres", [])],
             themes=[t["name"] for t in data.get("themes", [])],
-            platforms=[p["name"] for p in data.get("platforms", [])],
+            platforms=[
+                IGDBPlatform(
+                    igdb_id=p["id"],
+                    name=p["name"],
+                    db_id=platform_db_ids.get(p["id"], -1),
+                )
+                for p in data.get("platforms", [])
+            ],
             release_dates=release_dates,
             first_release_date=data.get("first_release_date"),
             involved_companies=involved_companies,

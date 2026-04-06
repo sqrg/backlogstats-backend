@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.game import Game
+from app.models.platform import Platform
 from app.schemas.game import GameCreate, GameRead, GameUpdate
 from app.schemas.igdb import GameFromIGDB, IGDBGameResult
 from app.services.igdb import igdb_service
@@ -22,7 +23,9 @@ def list_games(
 # NOTE: /search must be registered before /{id} so FastAPI does not treat the
 # literal string "search" as the value of the {id} path parameter.
 @router.get("/search", response_model=list[IGDBGameResult])
-async def search_games(q: str, limit: int = 10) -> list[IGDBGameResult]:
+async def search_games(
+    q: str, limit: int = 10, db: Session = Depends(get_db)
+) -> list[IGDBGameResult]:
     if not igdb_service._credentials_configured():
         raise HTTPException(
             status_code=503, detail="IGDB credentials are not configured"
@@ -36,7 +39,29 @@ async def search_games(q: str, limit: int = 10) -> list[IGDBGameResult]:
                 status_code=429, detail="IGDB rate limit exceeded; please retry shortly"
             )
         raise HTTPException(status_code=502, detail="IGDB request failed")
-    return [IGDBGameResult.from_igdb(r) for r in results]
+
+    # Collect all unique platforms across results and upsert into our DB so
+    # the frontend can reference them by internal ID without a separate fetch.
+    all_igdb_platforms: dict[int, str] = {}  # igdb_id -> name
+    for r in results:
+        for p in r.get("platforms", []):
+            all_igdb_platforms[p["id"]] = p["name"]
+
+    platform_db_ids: dict[int, int] = {}  # igdb_id -> internal db id
+    for igdb_id, name in all_igdb_platforms.items():
+        existing = db.execute(
+            select(Platform).where(Platform.name == name)
+        ).scalar_one_or_none()
+        if existing:
+            platform_db_ids[igdb_id] = existing.id
+        else:
+            platform = Platform(name=name)
+            db.add(platform)
+            db.flush()
+            platform_db_ids[igdb_id] = platform.id
+    db.commit()
+
+    return [IGDBGameResult.from_igdb(r, platform_db_ids) for r in results]
 
 
 @router.post("/from-igdb", response_model=GameRead, status_code=201)

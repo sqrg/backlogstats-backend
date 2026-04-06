@@ -1,0 +1,23 @@
+meta {
+  name: Get Game (all fields)
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://api.igdb.com/v4/games
+  body: text
+  auth: bearer
+}
+
+headers {
+  Client-ID: {{igdbClientId}}
+}
+
+auth:bearer {
+  token: {{igdbAccessToken}}
+}
+
+body:text {
+  fields platforms.name; where id = {{igdbGameId}}; limit 1;
+}

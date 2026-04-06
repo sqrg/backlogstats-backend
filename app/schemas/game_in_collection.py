@@ -3,28 +3,32 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class GameInCollectionBase(BaseModel):
-    user_id: int
+class GameSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    cover_image_id: str | None
+
+
+class PlatformSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class GameInCollectionCreate(BaseModel):
     game_id: int
     platform_id: int
-
-
-class GameInCollectionCreate(GameInCollectionBase):
-    pass
-
-
-class GameInCollectionUpdate(BaseModel):
-    user_id: int | None = None
-    game_id: int | None = None
-    platform_id: int | None = None
+    # user_id is derived from the auth token — not accepted in request body
 
 
 class GameInCollectionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    user_id: int
-    game_id: int
-    platform_id: int
+    game: GameSummary
+    platform: PlatformSummary
     created_at: datetime
     updated_at: datetime
