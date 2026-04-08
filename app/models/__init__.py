@@ -1,5 +1,6 @@
 from app.models.base import Base, TimestampMixin
 from app.models.company import Company
+from app.models.game_type import GameType
 from app.models.game import Game
 from app.models.game_genre import GameGenre
 from app.models.game_in_collection import GameInCollection
@@ -16,6 +17,7 @@ __all__ = [
     "Base",
     "TimestampMixin",
     "Company",
+    "GameType",
     "Game",
     "GameGenre",
     "GameInCollection",

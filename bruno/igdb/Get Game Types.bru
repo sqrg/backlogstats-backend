@@ -1,11 +1,11 @@
 meta {
-  name: Get Game (all fields)
+  name: Get Game Types
   type: http
-  seq: 1
+  seq: 3
 }
 
 post {
-  url: https://api.igdb.com/v4/games
+  url: https://api.igdb.com/v4/game_types
   body: text
   auth: bearer
 }
@@ -19,5 +19,5 @@ auth:bearer {
 }
 
 body:text {
-  fields *; where id = {{igdbGameId}}; limit 1;
+  fields checksum, created_at, type, updated_at;
 }

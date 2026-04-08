@@ -3,11 +3,19 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 
 import httpx
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.game_type import GameType
+from app.models.genre import Genre
+from app.models.platform import Platform
 
 _TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 _IGDB_GAMES_URL = "https://api.igdb.com/v4/games"
+_IGDB_GAME_TYPES_URL = "https://api.igdb.com/v4/game_types"
+_IGDB_GENRES_URL = "https://api.igdb.com/v4/genres"
+_IGDB_PLATFORMS_URL = "https://api.igdb.com/v4/platforms"
 
 _IGDB_FIELDS = (
     "fields id, name, slug, url, summary, storyline, category, status,"
@@ -21,7 +29,8 @@ _IGDB_FIELDS = (
     " aggregated_rating, aggregated_rating_count,"
     " total_rating, total_rating_count,"
     " screenshots.image_id, artworks.image_id,"
-    " collections.id, collections.name, collections.slug;"
+    " collections.id, collections.name, collections.slug,"
+    " game_type.type;"
 )
 
 
@@ -84,6 +93,53 @@ class IGDBService:
             response.raise_for_status()
         results = response.json()
         return results[0] if results else None
+
+    async def sync_game_types(self, db: Session) -> list[GameType]:
+        body = "fields id, type; limit 50;"
+        headers = await self._headers()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                _IGDB_GAME_TYPES_URL, headers=headers, data=body
+            )
+            response.raise_for_status()
+        for item in response.json():
+            db.merge(GameType(id=item["id"], type=item["type"]))
+        db.commit()
+        return list(db.execute(select(GameType)).scalars().all())
+
+    async def sync_genres(self, db: Session) -> list[Genre]:
+        body = "fields id, name; limit 500; sort id asc;"
+        headers = await self._headers()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                _IGDB_GENRES_URL, headers=headers, content=body.encode()
+            )
+            response.raise_for_status()
+        for item in response.json():
+            existing = db.execute(
+                select(Genre).where(Genre.name == item["name"])
+            ).scalar_one_or_none()
+            if not existing:
+                db.add(Genre(name=item["name"]))
+        db.commit()
+        return list(db.execute(select(Genre).order_by(Genre.name)).scalars().all())
+
+    async def sync_platforms(self, db: Session) -> list[Platform]:
+        body = "fields id, name; limit 500; sort id asc;"
+        headers = await self._headers()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                _IGDB_PLATFORMS_URL, headers=headers, content=body.encode()
+            )
+            response.raise_for_status()
+        for item in response.json():
+            existing = db.execute(
+                select(Platform).where(Platform.name == item["name"])
+            ).scalar_one_or_none()
+            if not existing:
+                db.add(Platform(name=item["name"]))
+        db.commit()
+        return list(db.execute(select(Platform).order_by(Platform.name)).scalars().all())
 
 
 igdb_service = IGDBService()

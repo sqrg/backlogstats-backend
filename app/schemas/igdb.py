@@ -73,12 +73,15 @@ class IGDBGameResult(BaseModel):
     screenshot_image_ids: list[str]
     artwork_image_ids: list[str]
     category: int | None
+    game_type: str | None
     status: int | None
     series: list[IGDBSeriesResult]
 
     @classmethod
     def from_igdb(
-        cls, data: dict, platform_db_ids: dict[int, int] | None = None
+        cls,
+        data: dict,
+        platform_db_ids: dict[int, int] | None = None,
     ) -> "IGDBGameResult":
         cover_data = data.get("cover")
         cover = IGDBCover.from_image_id(cover_data["image_id"]) if cover_data else None
@@ -136,6 +139,7 @@ class IGDBGameResult(BaseModel):
             screenshot_image_ids=[s["image_id"] for s in data.get("screenshots", [])],
             artwork_image_ids=[a["image_id"] for a in data.get("artworks", [])],
             category=data.get("category"),
+            game_type=data["game_type"]["type"] if data.get("game_type") else None,
             status=data.get("status"),
             series=[
                 IGDBSeriesResult(
