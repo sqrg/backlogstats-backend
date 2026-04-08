@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.game_in_collection import GameInCollection
-from app.models.playthrough import Playthrough
+from app.models.playthrough import Playthrough, PlaythroughStatus
 from app.models.user import User
 from app.schemas.game_in_collection import (
     GameInCollectionCreate,
@@ -62,13 +62,19 @@ def create_collection_entry(
     )
     db.add(entry)
     try:
-        db.commit()
+        db.flush()
     except IntegrityError:
         db.rollback()
         raise HTTPException(
             status_code=409,
             detail="Game already in collection on this platform",
         )
+    db.add(
+        Playthrough(
+            game_in_collection_id=entry.id, status=PlaythroughStatus.NOT_STARTED
+        )
+    )
+    db.commit()
     db.refresh(entry)
     return entry
 
