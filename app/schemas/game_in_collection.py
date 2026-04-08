@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.playthrough import PlaythroughRead
+
 
 class GameSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -32,3 +34,7 @@ class GameInCollectionRead(BaseModel):
     platform: PlatformSummary
     created_at: datetime
     updated_at: datetime
+
+
+class GameInCollectionWithPlaythroughsRead(GameInCollectionRead):
+    playthroughs: list[PlaythroughRead]

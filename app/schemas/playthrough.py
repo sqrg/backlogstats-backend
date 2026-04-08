@@ -5,16 +5,15 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from app.models.playthrough import PlaythroughStatus
 
 
-class PlaythroughBase(BaseModel):
-    game_in_collection_id: int
+class PlaythroughCreate(BaseModel):
     status: PlaythroughStatus
     started_at: date | None = None
     completed_at: date | None = None
-    completion_time: int | None = None
+    completion_time: int | None = None  # hours
     notes: str | None = None
 
     @model_validator(mode="after")
-    def check_completion_fields(self) -> "PlaythroughBase":
+    def check_completion_fields(self) -> "PlaythroughCreate":
         if self.status != PlaythroughStatus.COMPLETED:
             if self.completed_at is not None:
                 raise ValueError(
@@ -27,16 +26,11 @@ class PlaythroughBase(BaseModel):
         return self
 
 
-class PlaythroughCreate(PlaythroughBase):
-    pass
-
-
 class PlaythroughUpdate(BaseModel):
-    game_in_collection_id: int | None = None
     status: PlaythroughStatus | None = None
     started_at: date | None = None
     completed_at: date | None = None
-    completion_time: int | None = None
+    completion_time: int | None = None  # hours
     notes: str | None = None
 
     @model_validator(mode="after")
@@ -61,7 +55,7 @@ class PlaythroughRead(BaseModel):
     status: PlaythroughStatus
     started_at: date | None
     completed_at: date | None
-    completion_time: int | None
+    completion_time: int | None  # hours
     notes: str | None
     created_at: datetime
     updated_at: datetime

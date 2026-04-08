@@ -6,11 +6,14 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.game_in_collection import GameInCollection
+from app.models.playthrough import Playthrough
 from app.models.user import User
 from app.schemas.game_in_collection import (
     GameInCollectionCreate,
     GameInCollectionRead,
+    GameInCollectionWithPlaythroughsRead,
 )
+from app.schemas.playthrough import PlaythroughCreate, PlaythroughRead
 
 router = APIRouter(prefix="/collection", tags=["collection"])
 
@@ -34,7 +37,7 @@ def list_collection(
     )
 
 
-@router.get("/{id}", response_model=GameInCollectionRead)
+@router.get("/{id}", response_model=GameInCollectionWithPlaythroughsRead)
 def get_collection_entry(
     id: int,
     db: Session = Depends(get_db),
@@ -68,6 +71,23 @@ def create_collection_entry(
         )
     db.refresh(entry)
     return entry
+
+
+@router.post("/{id}/playthroughs", response_model=PlaythroughRead, status_code=201)
+def create_playthrough(
+    id: int,
+    body: PlaythroughCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Playthrough:
+    entry = db.get(GameInCollection, id)
+    if not entry or entry.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Collection entry not found")
+    playthrough = Playthrough(game_in_collection_id=id, **body.model_dump())
+    db.add(playthrough)
+    db.commit()
+    db.refresh(playthrough)
+    return playthrough
 
 
 @router.delete("/{id}", status_code=204)
