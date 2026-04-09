@@ -1,0 +1,21 @@
+meta {
+  name: Set Base Game
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/collection/{{collectionEntryId}}/base-game
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "base_game_entry_id": 1
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Import DLC
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/collection/{{collectionEntryId}}/import-dlc
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "igdb_ids": [1234, 5678]
+  }
+}

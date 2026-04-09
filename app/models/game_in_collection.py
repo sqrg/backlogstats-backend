@@ -35,6 +35,11 @@ class GameInCollection(Base, TimestampMixin):
         ForeignKey("platforms.id", ondelete="RESTRICT"),
         nullable=False,
     )
+    base_game_entry_id: Mapped[int | None] = mapped_column(
+        ForeignKey("games_in_collection.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
 
     user: Mapped[User] = relationship(
         "User",
@@ -56,4 +61,10 @@ class GameInCollection(Base, TimestampMixin):
         back_populates="game_in_collection",
         lazy="selectin",
         cascade="all, delete-orphan",
+    )
+    base_game: Mapped[GameInCollection | None] = relationship(
+        "GameInCollection",
+        foreign_keys="[GameInCollection.base_game_entry_id]",
+        remote_side="[GameInCollection.id]",
+        lazy="selectin",
     )

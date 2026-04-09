@@ -72,7 +72,7 @@ class IGDBGameResult(BaseModel):
     total_rating_count: int | None
     screenshot_image_ids: list[str]
     artwork_image_ids: list[str]
-    category: int | None
+    dlcs: list[int] = []
     game_type: str | None
     status: int | None
     series: list[IGDBSeriesResult]
@@ -138,7 +138,7 @@ class IGDBGameResult(BaseModel):
             total_rating_count=data.get("total_rating_count"),
             screenshot_image_ids=[s["image_id"] for s in data.get("screenshots", [])],
             artwork_image_ids=[a["image_id"] for a in data.get("artworks", [])],
-            category=data.get("category"),
+            dlcs=data.get("dlcs", []),
             game_type=data["game_type"]["type"] if data.get("game_type") else None,
             status=data.get("status"),
             series=[

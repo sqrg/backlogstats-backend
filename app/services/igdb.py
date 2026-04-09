@@ -18,7 +18,7 @@ _IGDB_GENRES_URL = "https://api.igdb.com/v4/genres"
 _IGDB_PLATFORMS_URL = "https://api.igdb.com/v4/platforms"
 
 _IGDB_FIELDS = (
-    "fields id, name, slug, url, summary, storyline, category, status,"
+    "fields id, name, slug, url, summary, storyline, status,"
     " first_release_date,"
     " cover.image_id, cover.url,"
     " genres.name, themes.name, platforms.name,"
@@ -30,7 +30,7 @@ _IGDB_FIELDS = (
     " total_rating, total_rating_count,"
     " screenshots.image_id, artworks.image_id,"
     " collections.id, collections.name, collections.slug,"
-    " game_type.type;"
+    " game_type.type, dlcs;"
 )
 
 
@@ -139,7 +139,9 @@ class IGDBService:
             if not existing:
                 db.add(Platform(name=item["name"]))
         db.commit()
-        return list(db.execute(select(Platform).order_by(Platform.name)).scalars().all())
+        return list(
+            db.execute(select(Platform).order_by(Platform.name)).scalars().all()
+        )
 
 
 igdb_service = IGDBService()
