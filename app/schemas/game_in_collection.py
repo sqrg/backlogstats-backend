@@ -49,6 +49,7 @@ class GameInCollectionRead(BaseModel):
 
 class GameInCollectionWithPlaythroughsRead(GameInCollectionRead):
     playthroughs: list[PlaythroughRead]
+    children: list[BaseGameSummary]
 
 
 class GameInCollectionSetBaseGame(BaseModel):

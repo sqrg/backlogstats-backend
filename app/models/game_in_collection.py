@@ -67,6 +67,13 @@ class GameInCollection(Base, TimestampMixin):
         "GameInCollection",
         foreign_keys="[GameInCollection.base_game_entry_id]",
         remote_side="[GameInCollection.id]",
+        back_populates="children",
+        lazy="selectin",
+    )
+    children: Mapped[list[GameInCollection]] = relationship(
+        "GameInCollection",
+        foreign_keys="[GameInCollection.base_game_entry_id]",
+        back_populates="base_game",
         lazy="selectin",
     )
 
