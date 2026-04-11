@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.models.playthrough import PlaythroughStatus
 from app.schemas.playthrough import PlaythroughRead
 
 
@@ -41,6 +42,7 @@ class GameInCollectionRead(BaseModel):
     game: GameSummary
     platform: PlatformSummary
     base_game: BaseGameSummary | None
+    current_status: PlaythroughStatus | None
     created_at: datetime
     updated_at: datetime
 

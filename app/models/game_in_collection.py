@@ -6,6 +6,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
+from app.models.playthrough import PlaythroughStatus
 
 if TYPE_CHECKING:
     from app.models.game import Game
@@ -68,3 +69,9 @@ class GameInCollection(Base, TimestampMixin):
         remote_side="[GameInCollection.id]",
         lazy="selectin",
     )
+
+    @property
+    def current_status(self) -> PlaythroughStatus | None:
+        if not self.playthroughs:
+            return None
+        return max(self.playthroughs, key=lambda p: p.updated_at).status
