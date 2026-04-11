@@ -5,18 +5,12 @@ from pydantic import BaseModel, ConfigDict
 from app.schemas.user_list_entry import UserListEntryRead
 
 
-class UserListBase(BaseModel):
-    user_id: int
+class UserListCreate(BaseModel):
     name: str
     is_public: bool = False
 
 
-class UserListCreate(UserListBase):
-    pass
-
-
 class UserListUpdate(BaseModel):
-    user_id: int | None = None
     name: str | None = None
     is_public: bool | None = None
 

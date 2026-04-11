@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.game_in_collection import GameSummary
+
 
 class UserListEntryBase(BaseModel):
     list_id: int
@@ -25,6 +27,7 @@ class UserListEntryRead(BaseModel):
     id: int
     list_id: int
     game_id: int
+    game: GameSummary
     position: int | None
     created_at: datetime
     updated_at: datetime
