@@ -1,0 +1,19 @@
+meta {
+  name: Get Completed By Platform
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/completed-by-platform?period=all
+  body: none
+  auth: bearer
+}
+
+params:query {
+  period: all
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Get Avg Completion Time
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/avg-completion-time
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

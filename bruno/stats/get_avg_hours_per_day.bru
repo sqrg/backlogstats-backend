@@ -1,0 +1,15 @@
+meta {
+  name: Get Avg Hours Per Day
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/avg-hours-per-day
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

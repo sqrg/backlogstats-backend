@@ -15,6 +15,7 @@ from app.routers import (
     platforms,
     playthroughs,
     series,
+    stats,
     user_list_entries,
     user_lists,
     users,
@@ -48,6 +49,7 @@ app.include_router(series.router, prefix=_API_PREFIX)
 app.include_router(game_types.router, prefix=_API_PREFIX)
 app.include_router(user_lists.router, prefix=_API_PREFIX)
 app.include_router(user_list_entries.router, prefix=_API_PREFIX)
+app.include_router(stats.router, prefix=_API_PREFIX)
 
 
 @app.exception_handler(StarletteHTTPException)

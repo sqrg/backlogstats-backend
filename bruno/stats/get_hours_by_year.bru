@@ -1,0 +1,15 @@
+meta {
+  name: Get Hours By Year
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/hours-by-year
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

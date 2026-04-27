@@ -1,0 +1,15 @@
+meta {
+  name: Get Genre Breakdown
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/genre-breakdown
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

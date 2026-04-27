@@ -1,0 +1,15 @@
+meta {
+  name: Get Completion Rate
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/stats/completion-rate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
