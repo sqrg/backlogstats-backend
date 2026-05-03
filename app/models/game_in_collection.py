@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from datetime import date
+
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -82,3 +84,25 @@ class GameInCollection(Base, TimestampMixin):
         if not self.playthroughs:
             return None
         return max(self.playthroughs, key=lambda p: p.updated_at).status
+
+    @property
+    def completed_years(self) -> list[int]:
+        """Distinct years in which this entry has a COMPLETED playthrough.
+
+        Returned sorted ascending so clients can render them deterministically.
+        """
+        years: set[int] = set()
+        for p in self.playthroughs:
+            if p.status == PlaythroughStatus.COMPLETED and p.completed_at:
+                years.add(p.completed_at.year)
+        return sorted(years)
+
+    @property
+    def last_completed_at(self) -> date | None:
+        """Most recent completed_at across COMPLETED playthroughs, or None."""
+        dates = [
+            p.completed_at
+            for p in self.playthroughs
+            if p.status == PlaythroughStatus.COMPLETED and p.completed_at
+        ]
+        return max(dates) if dates else None

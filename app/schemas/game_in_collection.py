@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -24,6 +24,10 @@ class PlatformSummary(BaseModel):
 class GameInCollectionCreate(BaseModel):
     game_id: int
     platform_id: int
+    # When true, the router will not auto-create a NOT_STARTED playthrough on
+    # insert. Used by the legacy import flow which immediately attaches a
+    # COMPLETED playthrough instead.
+    skip_default_playthrough: bool = False
     # user_id is derived from the auth token — not accepted in request body
 
 
@@ -43,6 +47,8 @@ class GameInCollectionRead(BaseModel):
     platform: PlatformSummary
     base_game: BaseGameSummary | None
     current_status: PlaythroughStatus | None
+    completed_years: list[int]
+    last_completed_at: date | None
     created_at: datetime
     updated_at: datetime
 
