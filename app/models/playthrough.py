@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import enum
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, Enum, ForeignKey, Integer, Text
+from sqlalchemy import Date, Enum, ForeignKey, Numeric, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -37,7 +38,7 @@ class Playthrough(Base, TimestampMixin):
     # completed_at and completion_time are only meaningful when status is COMPLETED.
     # Enforcement is at the application/schema layer, not the database layer.
     completed_at: Mapped[date | None] = mapped_column(Date)
-    completion_time: Mapped[int | None] = mapped_column(Integer)
+    completion_time: Mapped[Decimal | None] = mapped_column(Numeric(6, 2))
     notes: Mapped[str | None] = mapped_column(Text)
 
     game_in_collection: Mapped[GameInCollection] = relationship(

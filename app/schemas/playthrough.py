@@ -9,7 +9,7 @@ class PlaythroughCreate(BaseModel):
     status: PlaythroughStatus
     started_at: date | None = None
     completed_at: date | None = None
-    completion_time: int | None = None  # hours
+    completion_time: float | None = None  # hours (decimal)
     notes: str | None = None
 
     @model_validator(mode="after")
@@ -30,7 +30,7 @@ class PlaythroughUpdate(BaseModel):
     status: PlaythroughStatus | None = None
     started_at: date | None = None
     completed_at: date | None = None
-    completion_time: int | None = None  # hours
+    completion_time: float | None = None  # hours (decimal)
     notes: str | None = None
 
     @model_validator(mode="after")
@@ -55,7 +55,7 @@ class PlaythroughRead(BaseModel):
     status: PlaythroughStatus
     started_at: date | None
     completed_at: date | None
-    completion_time: int | None  # hours
+    completion_time: float | None  # hours (decimal)
     notes: str | None
     created_at: datetime
     updated_at: datetime

@@ -73,9 +73,9 @@ def get_hours_by_year(
         )
     ).scalars().all()
 
-    totals: dict[int, int] = defaultdict(int)
+    totals: dict[int, float] = defaultdict(float)
     for p in playthroughs:
-        totals[p.completed_at.year] += p.completion_time
+        totals[p.completed_at.year] += float(p.completion_time)
     return [
         HoursByYear(year=year, hours=hours)
         for year, hours in sorted(totals.items())
@@ -102,9 +102,9 @@ def get_hours_by_month(
         )
     ).scalars().all()
 
-    totals: dict[tuple[int, int], int] = defaultdict(int)
+    totals: dict[tuple[int, int], float] = defaultdict(float)
     for p in playthroughs:
-        totals[(p.completed_at.year, p.completed_at.month)] += p.completion_time
+        totals[(p.completed_at.year, p.completed_at.month)] += float(p.completion_time)
     return [
         HoursByMonth(year=year, month=month, hours=hours)
         for (year, month), hours in sorted(totals.items())
@@ -161,16 +161,17 @@ def get_avg_completion_time(
         )
     ).scalars().all()
 
-    all_times = [p.completion_time for p in playthroughs]
+    all_times = [float(p.completion_time) for p in playthroughs]
     overall_avg = sum(all_times) / len(all_times) if all_times else None
 
-    genre_times: dict[str, list[int]] = defaultdict(list)
-    platform_times: dict[str, list[int]] = defaultdict(list)
+    genre_times: dict[str, list[float]] = defaultdict(list)
+    platform_times: dict[str, list[float]] = defaultdict(list)
     for p in playthroughs:
         gic = p.game_in_collection
+        ct = float(p.completion_time)
         for gg in gic.game.game_genres:
-            genre_times[gg.genre.name].append(p.completion_time)
-        platform_times[gic.platform.name].append(p.completion_time)
+            genre_times[gg.genre.name].append(ct)
+        platform_times[gic.platform.name].append(ct)
 
     by_genre = sorted(
         [
@@ -283,7 +284,7 @@ def get_avg_hours_per_day(
     def avg_for(days: int) -> float:
         cutoff = today - timedelta(days=days - 1)
         total = sum(
-            p.completion_time for p in playthroughs if p.completed_at >= cutoff
+            float(p.completion_time) for p in playthroughs if p.completed_at >= cutoff
         )
         return round(total / days, 2)
 

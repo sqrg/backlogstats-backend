@@ -13,13 +13,13 @@ class StatsSummary(BaseModel):
 
 class HoursByYear(BaseModel):
     year: int
-    hours: int
+    hours: float
 
 
 class HoursByMonth(BaseModel):
     year: int
     month: int
-    hours: int
+    hours: float
 
 
 class GenreAvg(BaseModel):
