@@ -16,6 +16,7 @@ class User(Base, TimestampMixin):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str | None] = mapped_column(String(30), unique=True)
     email: Mapped[str | None] = mapped_column(String, unique=True)
     hashed_password: Mapped[str | None] = mapped_column(String)
     google_id: Mapped[str | None] = mapped_column(String, unique=True)
