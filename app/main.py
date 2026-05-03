@@ -12,8 +12,10 @@ from app.routers import (
     game_types,
     games,
     genres,
+    import_legacy,
     platforms,
     playthroughs,
+    public_lists,
     series,
     stats,
     user_list_entries,
@@ -49,7 +51,9 @@ app.include_router(series.router, prefix=_API_PREFIX)
 app.include_router(game_types.router, prefix=_API_PREFIX)
 app.include_router(user_lists.router, prefix=_API_PREFIX)
 app.include_router(user_list_entries.router, prefix=_API_PREFIX)
+app.include_router(public_lists.router, prefix=_API_PREFIX)
 app.include_router(stats.router, prefix=_API_PREFIX)
+app.include_router(import_legacy.router, prefix=_API_PREFIX)
 
 
 @app.exception_handler(StarletteHTTPException)

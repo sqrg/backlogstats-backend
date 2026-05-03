@@ -25,3 +25,13 @@ class UserListRead(BaseModel):
     entries: list[UserListEntryRead]
     created_at: datetime
     updated_at: datetime
+
+
+class PublicUserListRead(BaseModel):
+    id: int
+    username: str
+    name: str
+    is_public: bool
+    entries: list[UserListEntryRead]
+    created_at: datetime
+    updated_at: datetime
