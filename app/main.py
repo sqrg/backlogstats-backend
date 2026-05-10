@@ -9,6 +9,7 @@ from app.routers import (
     auth,
     companies,
     game_in_collection,
+    game_sessions,
     game_types,
     games,
     genres,
@@ -47,6 +48,7 @@ app.include_router(platforms.router, prefix=_API_PREFIX)
 app.include_router(companies.router, prefix=_API_PREFIX)
 app.include_router(game_in_collection.router, prefix=_API_PREFIX)
 app.include_router(playthroughs.router, prefix=_API_PREFIX)
+app.include_router(game_sessions.router, prefix=_API_PREFIX)
 app.include_router(series.router, prefix=_API_PREFIX)
 app.include_router(game_types.router, prefix=_API_PREFIX)
 app.include_router(user_lists.router, prefix=_API_PREFIX)

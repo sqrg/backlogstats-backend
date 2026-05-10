@@ -1,0 +1,20 @@
+meta {
+  name: Get All Sessions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/sessions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+params:query {
+  limit: 100
+  offset: 0
+}

@@ -1,0 +1,24 @@
+meta {
+  name: Update Session
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/sessions/{{sessionId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "completion_time": 2.5,
+    "started_at": "2026-05-03",
+    "ended_at": "2026-05-03",
+    "notes": "Got stuck on the boss"
+  }
+}

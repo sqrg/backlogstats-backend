@@ -1,0 +1,24 @@
+meta {
+  name: Create Session
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/collection/{{collectionId}}/sessions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "completion_time": 1.5,
+    "started_at": "2026-05-03",
+    "ended_at": "2026-05-03",
+    "notes": null
+  }
+}

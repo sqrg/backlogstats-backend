@@ -1,10 +1,11 @@
 from app.models.base import Base, TimestampMixin
 from app.models.company import Company
-from app.models.game_type import GameType
 from app.models.game import Game
 from app.models.game_genre import GameGenre
 from app.models.game_in_collection import GameInCollection
 from app.models.game_series import GameSeries
+from app.models.game_session import GameSession
+from app.models.game_type import GameType
 from app.models.genre import Genre
 from app.models.platform import Platform
 from app.models.playthrough import Playthrough, PlaythroughStatus
@@ -22,6 +23,7 @@ __all__ = [
     "GameGenre",
     "GameInCollection",
     "GameSeries",
+    "GameSession",
     "Genre",
     "Platform",
     "Playthrough",

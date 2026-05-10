@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.game import Game
 from app.models.game_in_collection import GameInCollection
+from app.models.game_session import GameSession
 from app.models.playthrough import Playthrough, PlaythroughStatus
 from app.models.user import User
 from app.schemas.game_in_collection import (
@@ -18,6 +19,7 @@ from app.schemas.game_in_collection import (
     GameInCollectionSetBaseGame,
     GameInCollectionWithPlaythroughsRead,
 )
+from app.schemas.game_session import GameSessionCreate, GameSessionRead
 from app.schemas.playthrough import PlaythroughCreate, PlaythroughRead
 from app.services.igdb import igdb_service
 
@@ -116,6 +118,30 @@ def create_playthrough(
     db.commit()
     db.refresh(playthrough)
     return playthrough
+
+
+@router.post("/{id}/sessions", response_model=GameSessionRead, status_code=201)
+def create_session(
+    id: int,
+    body: GameSessionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> GameSession:
+    entry = db.get(GameInCollection, id)
+    if not entry or entry.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Collection entry not found")
+
+    session = GameSession(
+        game_in_collection_id=id,
+        completion_time=body.completion_time,
+        started_at=body.started_at,
+        ended_at=body.ended_at,
+        notes=body.notes,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return session
 
 
 @router.delete("/{id}", status_code=204)
