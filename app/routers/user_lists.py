@@ -8,7 +8,7 @@ from app.models.user import User
 from app.models.user_list import UserList
 from app.models.user_list_entry import UserListEntry
 from app.schemas.user_list import UserListCreate, UserListRead, UserListUpdate
-from app.schemas.user_list_entry import UserListEntryRead
+from app.schemas.user_list_entry import UserListEntryRead, UserListEntryReorder
 
 router = APIRouter(prefix="/lists", tags=["lists"])
 
@@ -100,9 +100,38 @@ def get_list_entries(
         db.execute(
             select(UserListEntry)
             .where(UserListEntry.list_id == id)
+            .order_by(UserListEntry.position)
             .offset(offset)
             .limit(limit)
         )
         .scalars()
         .all()
     )
+
+
+@router.put("/{id}/entries/reorder", response_model=UserListRead)
+def reorder_list_entries(
+    id: int,
+    body: UserListEntryReorder,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserList:
+    user_list = _get_owned_list(id, current_user, db)
+    entries = (
+        db.execute(select(UserListEntry).where(UserListEntry.list_id == id))
+        .scalars()
+        .all()
+    )
+    entries_by_id = {entry.id: entry for entry in entries}
+    if len(body.entry_ids) != len(entries) or set(body.entry_ids) != set(
+        entries_by_id
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="entry_ids must contain each entry of this list exactly once",
+        )
+    for position, entry_id in enumerate(body.entry_ids):
+        entries_by_id[entry_id].position = position
+    db.commit()
+    db.refresh(user_list)
+    return user_list

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -64,7 +64,16 @@ def create_entry(
     parent = db.get(UserList, body.list_id)
     if not parent or parent.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="List not found")
-    entry = UserListEntry(**body.model_dump())
+    data = body.model_dump()
+    if data.get("position") is None:
+        # Append new entries at the bottom of the list.
+        max_position = db.execute(
+            select(func.max(UserListEntry.position)).where(
+                UserListEntry.list_id == body.list_id
+            )
+        ).scalar()
+        data["position"] = 0 if max_position is None else max_position + 1
+    entry = UserListEntry(**data)
     db.add(entry)
     db.commit()
     db.refresh(entry)

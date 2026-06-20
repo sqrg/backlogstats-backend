@@ -35,4 +35,5 @@ class UserList(Base, TimestampMixin):
         back_populates="list",
         lazy="selectin",
         cascade="all, delete-orphan",
+        order_by="UserListEntry.position",
     )
